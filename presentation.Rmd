@@ -173,12 +173,22 @@ summary(mod)$coef
 -   Untransform (exponentitate) slope to get odds ratio
 
 ```{r}
-c(exp(coef(mod)[2]), exp(confint(mod)[2,]))
+c(coef(mod)[2], exp(coef(mod)[2]))
 
 # OR = 1.696
 # active rockets have 1.696 greater odds of success than retired rockets
 
 # we're 95% confident that active rockets have 1.273 to 2.302 times greater odds of being part of a successful mission than retired rockets
+```
+
+-   95% confidence interval
+
+```{r}
+confint(mod)[2,]
+```
+
+```{r}
+exp(confint(mod)[2,])
 ```
 
 ## USA vs Russia
@@ -234,8 +244,6 @@ round(coef(summary(usrus_mod)), 5)
 ```{r}
 OR <- exp(coef(usrus_mod)[2])
 # Russia has 1.376 times greater odds (is 1.376 times more likely) of having successful space missions than USA
-# In terms of probability
-prob <- exp(coef(usrus_mod)[2])/(1+exp(coef(usrus_mod)[2])) # 0.579
 ```
 
 ```{r}
@@ -243,7 +251,7 @@ CI <- exp(confint(usrus_mod)[2,]) # (1.099, 1.722) greater odds
 ```
 
 ```{r}
-c(OR, as.numeric(prob), CI)
+c(OR, CI)
 ```
 
 ## Space Race Decades: 1960s and 1970s
@@ -272,6 +280,7 @@ ggplotly(p)
 
 ```{r}
 dec_mod <- glm(Success ~ Decade, family = binomial, data = sprace)
+coef(summary(dec_mod))
 ```
 
 -   Inferences
