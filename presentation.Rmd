@@ -400,14 +400,12 @@ c(exp(coef(dec_mod)[2]), exp(confint(dec_mod)[2,]))
 
 ## Which model gives us best prediction?
 
-- AIC (Akaike's Information Criterion)  
-
-- The smaller the AIC, the better the model
+- Deviance: discrepancy between the observed responses and predicted values.
 
 ```{r}
 Model <- c("Rocket Status", "Country", "Decade")
-AIC <- round(c(mod$aic, usrus_mod$aic, dec_mod$aic), 3)
-datatable(rbind(Model, AIC), colnames = rep("", 3), options = list(dom = 't'))
+Deviance <- round(c(mod$deviance, usrus_mod$deviance, dec_mod$deviance), 3)
+datatable(rbind(Model, Deviance), colnames = rep("", 3), options = list(dom = 't'))
 ```
 
 ## Summary
@@ -432,7 +430,7 @@ datatable(rbind(Model, AIC), colnames = rep("", 3), options = list(dom = 't'))
 
 ## Thanks!
 
--   GitHub: https://github.com/qntkhvn/regression_project
+-   GitHub: https://github.com/qntkhvn/spacemissions
 -   Good luck with Finals!
 
 <br>
