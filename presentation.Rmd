@@ -249,7 +249,7 @@ ggplotly(p)
 
 ## Mission Status vs Rocket Status
 
--   Model $$logit(Pr(Success)) = 2.084 + 0.528 \cdot Active$$
+-   Model $$logit(Pr(Success)) = 2.084 + 0.528 \cdot ActiveYes$$
 
 ```{r}
 mod <- glm(Success ~ Active, family = binomial, data = sp)
