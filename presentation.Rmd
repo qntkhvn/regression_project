@@ -256,7 +256,7 @@ mod <- glm(Success ~ Active, family = binomial, data = sp)
 summary(mod)$coef
 ```
 
--   Untransform (exponentitate) the slope to get odds ratio
+-   Untransform (exponentiate) the slope to get odds ratio
 
 ```{r}
 c(coef(mod)[2], exp(coef(mod)[2]))
