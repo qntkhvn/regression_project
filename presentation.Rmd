@@ -399,7 +399,7 @@ c(exp(coef(dec_mod)[2]), exp(confint(dec_mod)[2,]))
 # (2.512, 4.519)
 ```
 
-## Which model gives us best prediction?
+## How well do our models fit the data?
 
 - Deviance: discrepancy between the observed responses and predicted values.
 
