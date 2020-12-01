@@ -275,13 +275,13 @@ mod <- glm(Success ~ Active, family = binomial, data = sp)
 summary(mod)$coef
 ```
 
--   Untransform (exponentitate) slope to get odds ratio
+-   Untransform (exponentitate) the slope to get odds ratio
 
 ```{r}
 c(coef(mod)[2], exp(coef(mod)[2]))
 
 # OR = 1.696
-# active rockets have 1.696 greater odds of success than retired rockets
+# active rockets have 1.696 times greater odds of success than retired rockets
 
 # we're 95% confident that active rockets have 1.273 to 2.302 times greater odds of being part of a successful mission than retired rockets
 ```
@@ -336,6 +336,8 @@ ggplotly(p)
 
 -   Model $$logit(Pr(Success)) = 2.016 + 0.319 \cdot Russia$$
 
+-   Inferences
+
 ```{r}
 usrus_mod <- glm(Success ~ Country,
                  family = binomial(link = "logit"),
@@ -344,7 +346,6 @@ usrus_mod <- glm(Success ~ Country,
 round(coef(summary(usrus_mod)), 5)
 ```
 
--   Inferences
 
 ```{r}
 OR <- exp(coef(usrus_mod)[2])
@@ -383,12 +384,12 @@ ggplotly(p)
 
 -   Model $$logit(Pr(Success)) = 1.329 + 1.211 \cdot Decade1970s$$
 
+-   Inferences
+
 ```{r}
 dec_mod <- glm(Success ~ Decade, family = binomial, data = sprace)
 coef(summary(dec_mod))
 ```
-
--   Inferences
 
 ```{r}
 c(exp(coef(dec_mod)[2]), exp(confint(dec_mod)[2,]))
