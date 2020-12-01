@@ -267,11 +267,7 @@ c(coef(mod)[2], exp(coef(mod)[2]))
 # we're 95% confident that active rockets have 1.273 to 2.302 times greater odds of being part of a successful mission than retired rockets
 ```
 
--   95% confidence interval
-
-```{r}
-confint(mod)[2,]
-```
+-   95% confidence interval for OR
 
 ```{r}
 exp(confint(mod)[2,])
