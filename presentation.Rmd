@@ -224,16 +224,34 @@ plot_ly(orgsuccessprop, x = ~Company, y = ~successprop,
 
 ## Method
 
--   Categorical Data Analysis with **Logistic Regression** $$\displaystyle logit(\pi) = log \left( \frac{\pi}{1- \pi} \right) = \beta_0 + \beta_1 X_{1} + \beta_2 X_{2} + \ldots + \beta_k X_{k}$$
+-   **Logistic Regression** $$\displaystyle logit(\pi) = log \left( \frac{\pi}{1- \pi} \right) = \beta_0 + \beta_1 X_{1} + \beta_2 X_{2} + \ldots + \beta_k X_{k}$$
 
--   **Single Logistic Regression** models $$\displaystyle logit(\pi) = log \left( \frac{\pi}{1- \pi} \right) = \beta_0 + \beta_1 X_{1}$$
+-   Binary categorical response variable (yes-no, pass-fail, success-failure, etc.)
+
+
+## Our Models
+
+-   **Single Logistic Regression** models $$\displaystyle logit(\pi) = log \left( \frac{\pi}{1- \pi} \right) = \beta_0 + \beta_1 X$$
 
     -   Response variable: Mission Outcome (Success: Yes/No)
 
     -   Predictors: Rocket Status (Active/Retired), Country (USA/Russia), Space Race Decade (1960s/1970s)
 
-- Inferences: for the slope term
+- Inferences for the slope term: 
   -   Determine whether the groups/levels in the explanatory variable differ in chance (odds) of success
+
+## Odds Ratio
+
+$$\displaystyle logit(\pi) = log \left( \frac{\pi}{1- \pi} \right) = \beta_0 + \beta_1 X$$
+
+-   Odds of observing a success when $X = 0$ (reference category): $e^{\beta_0}$
+
+-   Odds of observing a success when $X = 1$ (indicated category): $e^{\beta_0 + \beta_1} = e^{\beta_0} e^{\beta_1}$
+
+-   Odds ratio =  $e^{\beta_1}$ 
+
+-   Interpretation: odds of a success occurring when $X = 1$ is OR times greater than when $X = 0$.
+
 
 ## Mission Status vs Rocket Status
 
@@ -376,14 +394,24 @@ c(exp(coef(dec_mod)[2]), exp(confint(dec_mod)[2,]))
 # (2.512, 4.519)
 ```
 
-## How well do our models fit the data?
+## Model Fit
 
-- Deviance: discrepancy between the observed responses and predicted values.
+$$R^2 = 1 - \frac{Residual \ Deviance}{Null \ Deviance}$$
+
+-   Unlike linear regression...
+    -   Not the percentage of variability explained by the logistic model, but rather a ratio of how close is the fit to being good or bad.
+    -   Not related to any correlation coefficient.
+
+```{r}
+rsq <- function(model) {
+  1 - summary(model)$deviance / summary(model)$null.deviance
+}
+```
 
 ```{r}
 Model <- c("Rocket Status", "Country", "Decade")
-Deviance <- round(c(mod$deviance, usrus_mod$deviance, dec_mod$deviance), 3)
-datatable(rbind(Model, Deviance), colnames = rep("", 3), options = list(dom = 't'))
+Rsquared <- round(c(rsq(mod), rsq(usrus_mod), rsq(dec_mod)), 6)
+datatable(rbind(Model, Rsquared), colnames = rep("", 3), options = list(dom = 't'))
 ```
 
 ## Summary
@@ -402,7 +430,7 @@ datatable(rbind(Model, Deviance), colnames = rep("", 3), options = list(dom = 't
 
 ## Future Work
 
--   Time Series Analysis
+-   Continuous Predictors
 -   Mixed Models
 -   Spatial Visualization
 
