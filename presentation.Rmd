@@ -4,7 +4,7 @@ author: "Quang Nguyen & Sean Finn"
 date: "\ `r format(Sys.time(), '%B %d, %Y')`"
 output:
   ioslides_presentation: 
-    css: "style.css"
+    css: style.css
     smaller: yes
     widescreen: yes
     transition: faster
@@ -254,109 +254,7 @@ $$\displaystyle logit(\pi) = log \left( \frac{\pi}{1- \pi} \right) = \beta_0 + \
 -   Interpretation: odds of a success occurring when $X = 1$ is OR times greater than when $X = 0$.
 
 
-## Mission Status vs Rocket Status
-
--   Is there a difference in the chance of success between active and retired rockets?
-
-```{r}
-ct <- count(sp, Active, Success)
-p <- ggplot(data = ct) +
-  geom_mosaic(aes(weight = n, x = product(Active), fill = Success)) +
-  xlab("Active") + ylab("Success") + ggtitle("Space Mission Status and Outcome")
-ggplotly(p)
-```
-
-## Mission Status vs Rocket Status
-
--   Model $$logit(Pr(Success)) = 2.084 + 0.528 \cdot ActiveYes$$
-
-```{r}
-mod <- glm(Success ~ Active, family = binomial, data = sp)
-summary(mod)$coef
-```
-
--   Untransform (exponentiate) the slope to get odds ratio
-
-```{r}
-c(coef(mod)[2], exp(coef(mod)[2]))
-
-# OR = 1.696
-# active rockets have 1.696 times greater odds of success than retired rockets
-
-# we're 95% confident that active rockets have 1.273 to 2.302 times greater odds of being part of a successful mission than retired rockets
-```
-
--   95% confidence interval for OR
-
-```{r}
-exp(confint(mod)[2,])
-```
-
-## USA vs Russia
-
--   Do the two countries have the same chance of space mission success?
-
-```{r}
-sp <- sp %>%
-  mutate(ID = paste("id", 1:nrow(sp), sep = "")) %>% 
-  separate(Location, into = c("str1", "str2", "str3", "str4"), sep = ", ")
-
-usa <- sp %>% 
-  filter(str4 == "USA")
-
-rus <- sp %>% 
-  filter(str3 %in% c("Russia", "Kazakhstan") | str2 == "Russia")
-```
-
-```{r}
-sp <- sp %>% 
-  mutate(Country = ifelse(ID %in% usa$ID, "USA",
-                          ifelse(ID %in% rus$ID, "Russia", "Other")))
-```
-
-```{r}
-usrus <- sp %>% 
-  filter(Country %in% c("USA", "Russia"))
-usrus$Country <- factor(usrus$Country, levels = c("USA", "Russia"))
-```
-
-```{r}
-ct <- count(usrus, Country, Success)
-p <- ggplot(data = ct) +
-  geom_mosaic(aes(weight = n, x = product(Country), fill = Success)) +
-  xlab("Country") + ylab("Success") + ggtitle("Space Mission Outcome for USA and Russia")
-ggplotly(p)
-```
-
-## USA vs Russia
-
--   Model $$logit(Pr(Success)) = 2.016 + 0.319 \cdot Russia$$
-
--   Inferences
-
-```{r}
-usrus_mod <- glm(Success ~ Country,
-                 family = binomial(link = "logit"),
-                 data = usrus)
-
-round(coef(summary(usrus_mod)), 5)
-```
-
-
-```{r}
-OR <- exp(coef(usrus_mod)[2])
-# Russia has 1.376 times greater odds (is 1.376 times more likely) of having successful space missions than USA
-```
-
-```{r}
-CI <- exp(confint(usrus_mod)[2,]) # (1.099, 1.722) greater odds
-```
-
-```{r}
-c(OR, CI)
-```
-
-## Space Race Decades: 1960s and 1970s
+## Model: Mission Success and Space Race Decades
 
 ![Apollo 11](fig/ap11.gif){width="555"}
 
@@ -380,20 +278,28 @@ ggplotly(p)
 
 -   Model $$logit(Pr(Success)) = 1.329 + 1.211 \cdot Decade1970s$$
 
--   Inferences
-
 ```{r}
 dec_mod <- glm(Success ~ Decade, family = binomial, data = sprace)
 coef(summary(dec_mod))
 ```
 
-```{r}
-c(exp(coef(dec_mod)[2]), exp(confint(dec_mod)[2,]))
+-   Untransform (exponentiate) the slope to get odds ratio
 
-# OR = 3.355
-# 1970s: 3.355 times larger odds of successful
-# (2.512, 4.519)
+```{r}
+c(coef(dec_mod)[2], exp(coef(dec_mod)[2]))
+
+# OR = 1.696
+# active rockets have 1.696 times greater odds of success than retired rockets
+
+# we're 95% confident that active rockets have 1.273 to 2.302 times greater odds of being part of a successful mission than retired rockets
 ```
+
+-   95% confidence interval for OR
+
+```{r}
+exp(confint(dec_mod)[2,])
+```
+
 
 ## Model Fit
 
@@ -403,19 +309,21 @@ $$R^2 = 1 - \frac{Residual \ Deviance}{Null \ Deviance}$$
     -   Not the percentage of variability explained by the logistic model, but rather a ratio of how close is the fit to being good or bad.
     -   Not related to any correlation coefficient.
 
-```{r}
-rsq <- function(model) {
-  1 - summary(model)$deviance / summary(model)$null.deviance
+```{r, echo = TRUE}
+Rsq_log_reg <- function(model) {
+  1 - model$deviance / model$null.deviance
 }
 ```
 
+-   Space Race Decade Model: $R^2 = 0.0508$
+
 ```{r}
-Model <- c("Rocket Status", "Country", "Decade")
-Rsquared <- round(c(rsq(mod), rsq(usrus_mod), rsq(dec_mod)), 6)
-datatable(rbind(Model, Rsquared), colnames = rep("", 3), options = list(dom = 't'))
+# Model <- c("Rocket Status", "Country", "Decade")
+# Rsquared <- round(c(Rsq(mod), Rsq(usrus_mod), Rsq(dec_mod)), 6)
+# datatable(rbind(Model, Rsquared), colnames = rep("", 3), options = list(dom = 't'))
 ```
 
-## Summary
+## Other Results
 
 -   Active rockets have greater chance of success than retired rockets 
 
@@ -425,13 +333,9 @@ datatable(rbind(Model, Rsquared), colnames = rep("", 3), options = list(dom = 't
 
 (OR = 1.376, 95% CI (1.099, 1.722))
 
--   There's an increase in success rate from 1960s to 1970s 
-
-(OR = 3.355, 95% CI (2.512, 4.519))
-
 ## Future Work
 
--   Continuous Predictors
+-   Quantitative Predictors
 -   Mixed Models
 -   Spatial Visualization
 
