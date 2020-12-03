@@ -336,8 +336,7 @@ Rsq_log_reg <- function(model) {
 ## Future Work
 
 -   Quantitative Predictors
--   Mixed Models
--   Spatial Visualization
+-   Other Modeling Methods: Mixed Models, Time Series
 
 ## Thanks!
 
