@@ -10,6 +10,7 @@ output:
     transition: faster
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(warning = FALSE,
                       message = FALSE,
@@ -58,7 +59,7 @@ library(ggmosaic)
 ## Data
 
 ```{r}
-space <- read.csv("https://raw.githubusercontent.com/qntkhvn/regression_project/main/spacemission.csv")
+space <- read.csv("https://raw.githubusercontent.com/qntkhvn/spacemissions/main/spacemission.csv")
 ```
 
 ```{r}
