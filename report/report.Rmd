@@ -45,9 +45,7 @@ Throughout the history of rocket development and human spaceflight, launch succe
 
 # Data
 
-For this project, we used a dataset posted for public use on Kaggle that contains one observation for every recorded launch into Earth orbit or outer space. This encompasses 4324 launches from 1957 through to present day. These data were originally scraped from NextSpaceflight.com, which records all past and upcoming launches into space from all around the globe.
-
-The date of each launch is recorded, as well as the company or organization that conducted the launch, the location at which the launch took place, the name of the rocket used, the name of the mission, whether the rocket that was used is still currently active, and whether the launch succeeded or failed. Another variable in the original dataset was cost, which recorded the amount of dollars spent on the mission; however, well over half of the observations did not have values for that variable, and we therefore excluded it from analysis.
+For this project, we used a dataset posted for public use on Kaggle that contains one observation for every recorded launch into Earth orbit or outer space. This encompasses 4324 launches from 1957 through to present day. These data were originally scraped from NextSpaceflight.com, which records all past and upcoming launches into space from all around the globe. Our data consists of the following attributes: the date of each launch; the company or organization that conducted the launch; the location at which the launch took place; the name of the rocket used; the name of the mission; whether the rocket that was used is still currently active; and whether the launch succeeded or failed. Another variable in the original dataset was cost, which recorded the amount of dollars spent on the mission; however, well over half of the observations did not have values for that variable, and we therefore excluded it from our analysis.
 
 ```{r}
 space <- read.csv("https://raw.githubusercontent.com/qntkhvn/regression_project/main/spacemission.csv")
@@ -204,7 +202,7 @@ c(exp(coef(dec_mod)[2]), exp(confint(dec_mod)[2,])) %>% round(5)
 
 After fitting and analyzing our models, we are interested in how well our models fit their respective set of data. To measure the goodness-of-fit for our models, we use the $R^2$ statistic for logistic regression. $R^2$ can be computed as $$R^2 = 1 - \frac{Residual \ Deviance}{Null \ Deviance},$$ where the residual deviance is the deviance of our fitted (full) model, showing how well the response is predicted by the model when the predictor(s) are included. On the other hand, the null deviance shows how well the logit is predicted by a reduced model with only the intercept.
 
-There are similarities and differences between this $R^2$ for logistic regression and the linear regression version of $R^2$. In relation to the coefficient of determination, the residual deviance is equivalent to the error sum of squares, measuring the differences between the observed and predicted values for the response variable; whereas the null deviance is similar to the total sum of squares, which describes the differences between the observed dependent variable and its mean. Unlike linear regression's $R^2$, logistic regression's $R^2$ does not indicate the percentage of the variability in the dependent variable that the independent variable(s) explain collectively, but instead it is a ratio of how perfect or worst the fit is between the model and the data. The statistic is also not related to any correlation coefficient, hence is not a measure of the relationship strength between the variables.
+There are similarities and differences between this $R^2$ for logistic regression and the linear regression version of $R^2$. In relation to the coefficient of determination, the residual deviance is equivalent to the error sum of squares, measuring the differences between the observed and predicted values for the response variable; whereas the null deviance is similar to the total sum of squares, which describes the differences between the observed dependent variable and its mean. Unlike linear regression's $R^2$, the $R^2$ for our logit model does not indicate the percentage of the variability in the dependent variable that the independent variable(s) explain collectively, but instead it is a ratio of how perfect or worst the fit is between the model and the data. The statistic is also not related to any correlation coefficient, hence is not a measure of the relationship strength between the variables.
 
 ```{r}
 Rsq_log_reg <- function(model) {
@@ -233,6 +231,8 @@ Overall, it is important to keep in mind that these models provide small, incomp
 <div id="refs">
 
 </div>
+
+\vspace{5mm}
 
 # Credit
 
