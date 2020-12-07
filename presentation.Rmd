@@ -1,65 +1,54 @@
 ---
 title: "Analysis of Space Mission Success"
-author: "Quang Nguyen & Sean Finn"
-date: "\ `r format(Sys.time(), '%B %d, %Y')`"
+author: "Quang Nguyen and Sean Finn"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
-  ioslides_presentation: 
-    css: style.css
-    smaller: yes
-    widescreen: yes
-    transition: faster
+  pdf_document:
+    number_sections: yes
+    highlight: monochrome
+    df_print: kable
+geometry: margin=0.8in
+fontsize: 11pt
+nocite: |
+  @fox2015applied, @dunn2018generalized, @spacekaggle
+bibliography: ref.bib
 ---
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(warning = FALSE,
                       message = FALSE,
                       echo = FALSE,
-                      comment = "")
+                      comment="",
+                      fig.width = 5,
+                      fig.height = 3.5)
 ```
 
 ```{r}
 library(tidyverse)
-library(plotly)
-library(DT)
 library(mosaic)
 library(ggmosaic)
 ```
 
-## The first space launch occurred October 4, 1957. What was its name and who launched it?
+\begin{center}
+\large \bf{Abstract} 
+\end{center}
 
-> - ![](fig/sputnik.jpg)
+This project is a statistical investigation into space missions from 1957 to 2020. We primarily focused on modeling the relationship between mission outcome and other categorical factors. This work gives us sufficient evidence that there is a difference in the likelihood of space mission success between active and retired rockets; the United States and Russia; and the space race decades - 1960s and 1970s. In particular, our main findings are: 1) active rockets have greater chance of success than retired rockets (OR = 1.696, 95% CI (1.273, 2.302)), 2) Russia is more likely to have successful space missions than USA (OR = 1.376, 95% CI (1.099, 1.722)), and 3) there's an increase in success rate from 1960s to 1970s (OR = 3.355, 95% CI (2.512, 4.519)).
 
-> - Sputnik I, launched by the Soviet Union
+*Keywords*: Space exploration, logistic regression
 
-## One month later, on November 3, 1957, the first living being was launched into space. 
+# Introduction
 
-> - ![](fig/laika.jpg)
+Beginning with the launch of Sputnik I in 1957, humans have ventured into outer space and accumulated massive knowledge of the world and our place in it. Missions in Earth orbit and outer space have led to scientific discoveries, vast technological advancements, and a deeper understanding of Earth itself [@nasahistory]. In the 63 years since that inaugural launch, humans have attempted to launch rockets into space well over 4000 times. Although the vast majority (92%) of those launches were successful, a number of terrible tragedies have occurred through the decades, resulting in dozens of lives lost [@nasa2018]. One particularly jarring example to most Americans was the Space Shuttle Challenger, which exploded 73 seconds after launching on January 28, 1986. The shuttle was carrying seven astronauts, including a high school teacher whose story had garnered the attention of millions of live viewers. The explosion killed all seven people, and caused major shock waves in public opinion about space exploration and NASA, the National Aeronautics and Space Administration. 
 
-> - Laika the cosmo-dog
+Throughout the history of rocket development and human spaceflight, launch success has always been a crucial objective. It therefore makes sense that many interested parties, such as  government agencies, private corporations, and independent scientists, would be deeply interested in understanding what factors are related to launch success. This was our main objective for this project. While astronauts like Yuri Gagarin and Neil Armstrong set out to explore space, we set out to explore the data they produced through their missions and uncover the statistical differences in launch success rates.
 
-## It took four more years until the first human was launched into space on April 12, 1961.
+# Data
 
-> - ![](fig/gagarin.jpg)
-
-> - Yuri Gagarin
-
-## And then another eight years for humans to set foot on our Moon on July 20, 1969.
-
-> - ![](fig/ap11crew.jpg)
-
-> - NASA's Apollo 11 crew: Neil Armstrong, Michael Collins, and Buzz Aldrin
-
-## Project Goal
-
-- Determine the relationship between space mission **success** and other variables.
-
-![Space Shuttle Challenger exploded moments after launching on January 28, 1986. Source: *CNN news*](fig/challenger.gif)
-
-## Data
+For this project, we used a dataset posted for public use on Kaggle that contains one observation for every recorded launch into Earth orbit or outer space. This encompasses 4324 launches from 1957 through to present day. These data were originally scraped from NextSpaceflight.com, which records all past and upcoming launches into space from all around the globe. Our data consists of the following attributes: the date of each launch; the company or organization that conducted the launch; the location at which the launch took place; the name of the rocket used; the name of the mission; whether the rocket that was used is still currently active; and whether the launch succeeded or failed. Another variable in the original dataset was cost, which recorded the amount of dollars spent on the mission; however, well over half of the observations did not have values for that variable, and we therefore excluded it from our analysis.
 
 ```{r}
-space <- read.csv("https://raw.githubusercontent.com/qntkhvn/spacemissions/main/spacemission.csv")
+space <- read.csv("https://raw.githubusercontent.com/qntkhvn/regression_project/main/spacemission.csv")
 ```
 
 ```{r}
@@ -68,199 +57,119 @@ sp <- space[,3:ncol(space)] %>%
   mutate(Active = as.factor(ifelse(Status.Rocket == "StatusActive", "Yes", "No")),
          Success = as.factor(ifelse(Status.Mission == "Success", "Yes", "No"))) %>% 
   rename(Company = Company.Name)
-datatable(sp %>% 
-    select(Company, Location, Detail, Month, Day, Year, Active, Success) %>% 
-    arrange(Year),
-  options = list(pageLength = 5))
+# sp %>%
+#   select(Company, Location, Detail, Month, Day, Year, Active, Success) %>%
+#   arrange(Year) %>% 
+#   head(5)
 ```
 
-<br>
+# Methodology
 
-Source: <https://www.kaggle.com/agirlcoding/all-space-missions-from-1957>
+Our main method for this project is logistic regression, which allows us to model the relationship between the outcome of space missions and other factors, namely, rocket status (active versus retired), country (USA versus Russia), and space race decade (1960s versus 1970s). Logistic regression is appropriate when we have a response variable of binary categorical type, meaning that there are exactly two outcome levels, such as yes-no, pass-fail, or heads-tails. This applies to our case here, since our response variable, mission outcome, has two categories: success and failure.
 
-## Exploratory Data Analysis | Launches Over Time
+A logistic regression model has the form
 
-```{r}
-yrcount <- sp %>% 
-  group_by(Year) %>% 
-  summarise(count = n())
-```
+$$\displaystyle logit(\pi) = log \left( \frac{\pi}{1- \pi} \right) = \beta_0 + \beta_1 X_{1} + \beta_2 X_{2} + \ldots + \beta_k X_{k},$$
 
-```{r}
-plot_ly(yrcount, 
-        x = ~Year, 
-        y = ~count, 
-        type = 'scatter', 
-        mode = 'lines', 
-        fill = 'tozeroy',
-        fillcolor = "darkkhaki") %>%
-  layout(title = 'Launches into Earth Orbit or Outer Space, 1957-2020',
-         yaxis = list(title = "Yearly Count"), 
-         hovermode = 'compare')
-```
+with main components: the log odds of success as the response variable; and a linear predictor $\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \ldots + \beta_k X_k$, which is a linear combination of the explanatory variables (the $X$'s), with the $\beta$'s as the regression coefficients to be estimated.
 
-## Exploratory Data Analysis | Launch Organizations
+For this particular investigation, each of our models will only consist of one predictor for space mission success, hence they all have the form of a single logistic regression model, which is
+
+$$\displaystyle logit(\pi) = log \left( \frac{\pi}{1- \pi} \right) = \beta_0 + \beta_1 X.$$
+
+
+As with other regression methods, in logistic regression, we can make inferences about the terms in the model. In particular, we are interested in making hypothesis tests and confidence intervals for the slope term in each of our models. In terms of significance test, we can determine whether the groups or levels in the explanatory variable differ in chance (odds) of success. The test's null and alternative hypotheses are: $H_o:$ $\beta_1 = 0$ and $H_a:$ $\beta_1 \ne 0$. In addition, the formula for calculating our test statistic is $\displaystyle z = \frac{\hat{\beta_1}}{se(\hat{\beta_1})}$, which can then be used to obtain a two-sided p-value of $P(Z >|z|)$, where $Z$ follows a standard normal distribution. A confidence interval for the slope at significance level $\alpha$ can be computed using the expression $\hat{\beta_1} \pm z_{({1 - \alpha/2})} \cdot se(\hat{\beta_1})$, where $z_{({1 - \alpha/2})}$ is the $(1 - \alpha/2)^{th}$ quantile of a standard normal distribution.
+
+
+# Analysis
+
+## Mission Success and Rocket Status
+
+The first question we would like to investigate is: "Is there a difference in the chance of success between rockets with active status and retired rockets?" We start off by looking at a mosaic plot as well as a summary table of our variables of interest.
 
 ```{r}
-comp <- sp %>% 
-  group_by(Company) %>% 
-  mutate(ct = n()) %>% 
-  filter(ct >= 43) %>% 
-  ungroup() %>% 
-  group_by(Year, Company) %>% 
-  summarise(count = n())
+ct <- count(sp, Active, Success)
+ggplot(data = ct) +
+  geom_mosaic(aes(weight = n, x = product(Active), fill = Success)) +
+  xlab("Active") + ylab("Success") + ggtitle("Space Mission Status and Outcome")
 ```
 
 ```{r}
-plot_ly(comp, x = ~Company, y = ~count, type = 'bar',
-        color = I("chartreuse4")) %>%
-  layout(title = 'Space Launch Missions by Launch Organization',
-         yaxis = list(title = "Total number of launches"),
-         xaxis = list(title = "Organization or company name") ,
-         hovermode = 'compare')
+tally(Success ~ Active, format = "proportion", data = sp) %>% round(4)
 ```
 
-## Exploratory Data Analysis | Launch Organizations
+As we can see, the proportion of mission success for active rockets is higher than the chance of success for retired rockets. We then fit a logistic regression model of mission outcome versus rocket status and make inferences about the terms in our model to verify this relationship.
 
 ```{r}
-plot_ly(comp, 
-        x = ~Year, 
-        y = ~count, 
-        type = 'scatter', 
-        mode = 'lines', 
-        color = ~Company,
-        colors = "Paired",
-        fill = 'tozeroy') %>%
-  layout(title = 'Space Missons Conducted by Major Companies',
-         xaxis = list(dtick = 3),
-         yaxis = list(title = "Yearly Count"), 
-         hovermode = 'compare') 
+mod <- glm(Success ~ Active, family = binomial, data = sp)
+summary(mod)$coef
 ```
-
-## Exploratory Data Analysis | Launch Countries
 
 ```{r}
-sp <- sp %>% mutate(Country = word(Location, -1))
-countrycount <- sp %>% group_by(Country) %>% summarise(count = n())
-plot_ly(countrycount, x = ~Country, y = ~count, type = 'bar',
-        color = I("darkorchid4")) %>%
-  layout(title = 'Space Launch Missions by Launch Country',
-         yaxis = list(title = "Total number of launches"),
-         hovermode = 'compare')
+c(exp(coef(mod)[2]), exp(confint(mod)[2,])) %>% round(5)
 ```
 
-## Exploratory Data Analysis | Outcome Variable: Launch Success (92%)
-
-``` {r}
-successbinary <- sp[which(sp$Status.Mission=='Success' | sp$Status.Mission=='Failure'),]
-success.space <- successbinary %>% 
-                 group_by(Status.Mission) %>% 
-                 summarise(count = n())
-plot_ly(success.space, 
-        x = ~Status.Mission, 
-        y = ~count, 
-        type = 'bar',
-        color = ~Status.Mission,
-        showlegend = F) %>%
-  layout(title = 'Space Launch Successes and Failures',
-         xaxis = list(title = "Mission status"),
-         yaxis = list(title = "Launch count"))
-```
+With z = 3.501 and p-value = 0.0005, we have evidence that active rockets and retired rockets differ in chance of space mission success. If we focus on the estimated value for slope term of our model (0.528), it is the log odds ratio of success for the indicated category, active rockets, compared to the reference category, retired rockets. After exponentiating, the odds ratio for the probability of launch success comparing active to retired shuttles is 1.696 (95% CI (1.273, 2.302)), implying that active rockets have 1.696 times greater odds, thus are more likely to succeed, than non-active rockets.
 
 
-## Exploratory Data Analysis | Outcome Variable: Launch Success Over Time
+## Mission Success for USA and Russia
+
+Next, we are going to find out whether there is a difference between the chance of success for space missions conducted by the two giants in the space industry, the United States and Russia. This rivalry began in the late 1950s and early 1960s, as Russia started the competition by launching the first artificial satellite - Sputnik 1 - in 1957 and sending the first man into space - Yuri Gagarin - in 1961. As a result, the United States and President Kennedy responded by making an ambitious expansion and transformation to their national space program, with the goal of a moon landing, which they achieved in 1969. From then on, the race continues, and it is arguably the one of, if not the best rivalry in the history of space exploration. To find out which country is more successful, we begin with some numerical and visual summary of the launches executed by the two nations.
 
 ```{r}
-yrsuccesscount <- successbinary %>% group_by(Year, Status.Mission) %>% summarise(success = n())
-yrsuccess <- yrsuccesscount[which(yrsuccesscount$Status.Mission == 'Success'),]
-yrsuccessprop <- merge(yrsuccess, yrcount, by.x = "Year", by.y = "Year")
-yrsuccessprop$successprop <- (yrsuccessprop$success / yrsuccessprop$count) * 100
-plot_ly(yrsuccessprop, x = ~Year, y = ~successprop, color = I("dodgerblue3"), 
-        type = 'scatter', mode = 'lines') %>%
-  layout(title = 'Mission Launch Success Rate by Year',
-         yaxis = list(title = "Percent of total launches that succeeded"),
-         xaxis = list(title = "Year") ,
-         hovermode = 'compare')
+sp <- sp %>%
+  mutate(ID = paste("id", 1:nrow(sp), sep = "")) %>% 
+  separate(Location, into = c("str1", "str2", "str3", "str4"), sep = ", ")
+
+usa <- sp %>% 
+  filter(str4 == "USA")
+
+rus <- sp %>% 
+  filter(str3 %in% c("Russia", "Kazakhstan") | str2 == "Russia")
 ```
-
-
-## Exploratory Data Analysis | Outcome Variable: Launch Success by Country
 
 ```{r}
-countrysuccesscount <- successbinary %>% group_by(Country, Status.Mission) %>% summarise(success = n())
-countrysuccess <- countrysuccesscount[which(countrysuccesscount$Status.Mission == 'Success'),]
-countrysuccessprop <- merge(countrysuccess, countrycount, by.x = "Country", by.y = "Country")
-countrysuccessprop$successprop <- (countrysuccessprop$success / countrysuccessprop$count) * 100
-plot_ly(countrysuccessprop, x = ~Country, y = ~successprop, color = I("navy"), 
-        type = 'bar') %>%
-  layout(title = 'Space Launch Mission Success Rate by Launch Country',
-         yaxis = list(title = "Percent of total launches that succeeded"),
-         xaxis = list(title = "Launch country") ,
-         hovermode = 'compare')
+sp <- sp %>% 
+  mutate(Country = ifelse(ID %in% usa$ID, "USA",
+                          ifelse(ID %in% rus$ID, "Russia", "Other")))
 ```
-
-
-## Exploratory Data Analysis | Outcome Variable: Launch Success by Organization
 
 ```{r}
-companies <- as.data.frame(table(sp$Company))
-companies.restricted <- companies[which(companies$Freq >= 43), 1]
-space.restricted <- subset(sp, Company %in% companies.restricted)
-compcount <- sp %>% group_by(Company) %>% summarise(count = n())
-successbinary.restricted <- space.restricted[which(space.restricted$Status.Mission=='Success' | 
-                                                   space.restricted$Status.Mission=='Failure'),]
-orgsuccesscount <- successbinary.restricted %>% group_by(Company, Status.Mission) %>% summarise(success = n())
-orgsuccess <- orgsuccesscount[which(orgsuccesscount$Status.Mission == 'Success'),]
-orgsuccessprop <- merge(orgsuccess, compcount, 
-                        by.x = "Company", by.y = "Company")
-orgsuccessprop$successprop <- orgsuccessprop$success / orgsuccessprop$count
-plot_ly(orgsuccessprop, x = ~Company, y = ~successprop, 
-        color = I("mediumseagreen"), type = 'bar') %>%
-  layout(title = 'Space Launch Mission Success by Launch Organization',
-         yaxis = list(title = "Proportion of total launches that succeeded", 
-                      range = (c(.7, 1.01))),
-         xaxis = list(title = "Organization or company name") ,
-         hovermode = 'compare')
+usrus <- sp %>% 
+  filter(Country %in% c("USA", "Russia"))
+usrus$Country <- factor(usrus$Country, levels = c("USA", "Russia"))
 ```
 
-## Method
+```{r}
+ct <- count(usrus, Country, Success)
+ggplot(data = ct) +
+  geom_mosaic(aes(weight = n, x = product(Country), fill = Success)) +
+  xlab("Country") + ylab("Success") + ggtitle("Space Mission Outcome for USA and Russia")
+```
 
--   **Logistic Regression** $$\displaystyle logit(\pi) = log \left( \frac{\pi}{1- \pi} \right) = \beta_0 + \beta_1 X_{1} + \beta_2 X_{2} + \ldots + \beta_k X_{k}$$
+```{r}
+tally(Success ~ Country, format = "proportion", data = usrus) %>% round(4)
+```
 
--   Binary categorical response variable (yes-no, pass-fail, success-failure, etc.)
+The probability of mission success between the two countries are very close to one another, but Russia has a small lead over the United States. Indeed, the two nations differ in chance of mission success, as illustrated by our test result (z = 2.789, p-value = 0.005). What we also learn from the test output after back-transforming the estimated slope coefficient is that Russia has 1.376 times greater odds (95% CI (1.099, 1.722)), hence a higher chance, of having successful space missions than America.
 
+```{r}
+usrus_mod <- glm(Success ~ Country,
+                 family = binomial,
+                 data = usrus)
 
-## Our Models
+coef(summary(usrus_mod)) %>% round(5)
+```
 
--   **Single Logistic Regression** models $$\displaystyle logit(\pi) = log \left( \frac{\pi}{1- \pi} \right) = \beta_0 + \beta_1 X$$
-
-    -   Response variable: Mission Outcome (Success: Yes/No)
-
-    -   Predictors: Rocket Status (Active/Retired), Country (USA/Russia), Space Race Decade (1960s/1970s)
-
-- Inferences for the slope term: 
-  -   Determine whether the groups/levels in the explanatory variable differ in chance (odds) of success
-
-## Odds Ratio
-
-$$\displaystyle logit(\pi) = log \left( \frac{\pi}{1- \pi} \right) = \beta_0 + \beta_1 X$$
-
--   Odds of observing a success when $X = 0$ (reference category): $e^{\beta_0}$
-
--   Odds of observing a success when $X = 1$ (indicated category): $e^{\beta_0 + \beta_1} = e^{\beta_0} e^{\beta_1}$
-
--   Odds ratio =  $e^{\beta_1}$ 
-
--   Interpretation: odds of a success occurring when $X = 1$ is OR times greater than when $X = 0$.
+```{r, echo=FALSE}
+c(exp(coef(usrus_mod)[2]), exp(confint(usrus_mod)[2,])) %>% round(5)
+```
 
 
-## Model: Mission Success and Space Race Decades
-
-![Apollo 11](fig/ap11.gif){width="555"}
 
 ## Space Race Decades: 1960s and 1970s
 
-- Do the two decades differ in terms of successful rate of space mission?
+Our last relationship for this investigation is about mission outcome for the two space race decades, 1960s and 1970s, which is arguably the most important era in the history of space exploration. As mentioned in the previous section, the main highlights of this time period are Yuri Gagarin becoming the first cosmonaut to fly into outer space, and the peak of the space race which is the Apollo 11 mission that landed the first humans on the Moon. In addition to those historical events, this era means a lot to the future of astronomy and space science, as it paved the path for more space innovation and exploration in the following years. Similar to the previous two analyses, to begin our analysis on how successful the space missions were in the 1960s and 1970s, we first take a quick look at some figures of summary for our variables.
 
 ```{r}
 sprace <- sp %>% 
@@ -268,81 +177,163 @@ sprace <- sp %>%
   mutate(Decade = ifelse(Year %in% 1960:1969, "1960s", "1970s"))
 
 ct <- count(sprace, Decade, Success)
-p <- ggplot(data = ct) +
+ggplot(data = ct) +
   geom_mosaic(aes(weight = n, x = product(Decade), fill = Success)) +
   xlab("Decade") + ylab("Success") + ggtitle("1960s and 1970s Space Race Outcomes")
-ggplotly(p)
 ```
 
-## Space Race Decades: 1960s and 1970s
-
--   Model $$logit(Pr(Success)) = 1.329 + 1.211 \cdot Decade1970s$$
-
 ```{r}
+tally(Success ~ Decade, format = "proportion", data = sprace) %>% round(5)
+```
+
+From the mosaic plot and statistics above, it is clear that the 1970s has a higher success rate (92.7%) than the 1960s (79.1%). The test results from the outputted table of coefficients confirm that the chance of success for space missions is different for the 1960s and 1970s. In particular, there is an increase in space launch success rate from the 1960s to 1970s, as demonstrated by an odds ratio of 3.355 (95% CI (2.512, 4.519)). 
+
+```{r, }
 dec_mod <- glm(Success ~ Decade, family = binomial, data = sprace)
 coef(summary(dec_mod))
 ```
 
--   Untransform (exponentiate) the slope to get odds ratio
 
 ```{r}
-c(coef(dec_mod)[2], exp(coef(dec_mod)[2]))
-
-# OR = 1.696
-# active rockets have 1.696 times greater odds of success than retired rockets
-
-# we're 95% confident that active rockets have 1.273 to 2.302 times greater odds of being part of a successful mission than retired rockets
+c(exp(coef(dec_mod)[2]), exp(confint(dec_mod)[2,])) %>% round(5)
 ```
 
--   95% confidence interval for OR
+# Model Fit
+
+After fitting and analyzing our models, we are interested in how well our models fit their respective set of data. To measure the goodness-of-fit for our models, we use the $R^2$ statistic for logistic regression. $R^2$ can be computed as $$R^2 = 1 - \frac{Residual \ Deviance}{Null \ Deviance},$$ where the residual deviance is the deviance of our fitted (full) model, showing how well the response is predicted by the model when the predictor(s) are included. On the other hand, the null deviance shows how well the logit is predicted by a reduced model with only the intercept.
+
+There are similarities and differences between this $R^2$ for logistic regression and the linear regression version of $R^2$. In relation to the coefficient of determination, the residual deviance is equivalent to the error sum of squares, measuring the differences between the observed and predicted values for the response variable; whereas the null deviance is similar to the total sum of squares, which describes the differences between the observed dependent variable and its mean. Unlike linear regression's $R^2$, the $R^2$ for our logit model does not indicate the percentage of the variability in the dependent variable that the independent variable(s) explain collectively, but instead it is a ratio of how perfect or worst the fit is between the model and the data. The statistic is also not related to any correlation coefficient, hence is not a measure of the relationship strength between the variables.
 
 ```{r}
-exp(confint(dec_mod)[2,])
-```
-
-
-## Model Fit
-
-$$R^2 = 1 - \frac{Residual \ Deviance}{Null \ Deviance}$$
-
--   Unlike linear regression...
-    -   Not the percentage of variability explained by the logistic model, but rather a ratio of how close is the fit to being good or bad.
-    -   Not related to any correlation coefficient.
-
-```{r, echo = TRUE}
 Rsq_log_reg <- function(model) {
   1 - model$deviance / model$null.deviance
 }
+
+Rsquared <- rbind.data.frame(c(Rsq_log_reg(mod), 
+                               Rsq_log_reg(usrus_mod), 
+                               Rsq_log_reg(dec_mod)))
+colnames(Rsquared) <-  c("Rocket Status", "Country", "Decade")
+Rsquared %>% round(5)
 ```
 
--   Space Race Decade Model: $R^2 = 0.0508$
+We calculated the $R^2$ for each of our three models, which are displayed in the table above. As we can see, the fits do not look that great here, as all of our $R^2$ are closer to 0 rather than to a perfect fit of 1. The logistic regression model comparing space launch success for the two space race decades did the least worst of fitting its corresponding set of data compared to the other two models. This could be something to improve in the future, as we could try to find the best methods or subset of variables of predicting space mission success that give us the best fit.
 
-```{r}
-# Model <- c("Rocket Status", "Country", "Decade")
-# Rsquared <- round(c(Rsq(mod), Rsq(usrus_mod), Rsq(dec_mod)), 6)
-# datatable(rbind(Model, Rsquared), colnames = rep("", 3), options = list(dom = 't'))
+# Conclusion and Discussion
+
+In summary, we discovered multiple statistically meaningful relationships between rocket launch success and other factors. Unsurprisingly, rockets that are currently active have 1.696 times greater odds of success than rockets that are no longer active. This makes sense, as rockets are retired when technology improves or when, for example, they explode. Additionally, we found that rockets launched in the 1970s had 3.355 times greater odds of success than those launched in the 1960s. These results comport with common sense, although they would not be useful models for predicting the success of future launches, as all future rockets used will be active by definition and launches will not take place during either decade.
+
+Another interesting finding, and one with potential value for predicting future success, is that Russia has 1.376 times greater odds of success than the USA. This may be due to any number of factors that are country-specific. Possible explanations include funding, scientific or technological advances, or level of agency oversight. Although we do not currently have data with which we can discover those explanations, this finding does open the door to the interesting question of why Russia has higher odds of launch success than the United States. This is a possible avenue for future research into this topic. 
+
+Overall, it is important to keep in mind that these models provide small, incomplete pictures of the factors influencing launch success. Each model analyzes only one variable and the goodness-of-fit measures reveal that they do not fit the data well. In order to build a more complete picture, many more details about each launch would be necessary. Other future statistical analyses with these data may include multivariate regression, principal component analysis, neural networks, or time series analysis. 
+
+# References
+
+<div id="refs">
+
+</div>
+
+\vspace{5mm}
+
+# Credit
+
+Quang performed exploratory data analysis and researched and wrote descriptions of the logistic regression model. He also wrote the code to perform logistic regression in R and calculate the goodness-of-fit measure. Quang wrote the abstract, methodology, analysis, and model fit sections of the paper. Sean found the dataset, performed exploratory data analysis, wrote some of the code for data visualizations and researched goodness of fit measurement options. He wrote the introduction, data, and discussion and conclusions sections of the paper. Together we decided the model selection, wrote code for data visualization, and created the project presentation in R Markdown.
+
+\newpage
+
+# Appendix
+
+The R code for this manuscript can be found below. In addition, all of the materials related to this project are publicly available on GitHub at https://github.com/qntkhvn/spacemissions
+
+```{r, eval=FALSE, echo=TRUE}
+# Packages
+library(tidyverse)
+library(mosaic)
+library(ggmosaic)
+
+# Data
+data <- "https://raw.githubusercontent.com/qntkhvn/spacemissions/main/spacemission.csv"
+space <- read.csv(data)
+sp <- space[,3:ncol(space)] %>%
+  separate(Datum, into = c("Weekday", "Month", "Day", "Year")) %>%
+  mutate(Active = as.factor(ifelse(Status.Rocket == "StatusActive", "Yes", "No")),
+         Success = as.factor(ifelse(Status.Mission == "Success", "Yes", "No"))) %>%
+  rename(Company = Company.Name)
+
+# Rocket Status
+
+## Mosaic plot
+ct <- count(sp, Active, Success)
+ggplot(data = ct) +
+  geom_mosaic(aes(weight = n, x = product(Active), fill = Success)) +
+  xlab("Active") + ylab("Success") + 
+  ggtitle("Space Mission Status and Outcome")
+
+## 2x2 table
+tally(Success ~ Active, format = "proportion", data = sp) %>% round(4)
+
+## Model
+mod <- glm(Success ~ Active, family = binomial, data = sp)
+summary(mod)$coef %>% round(5)
+c(exp(coef(mod)[2]), exp(confint(mod)[2,])
+
+# USA vs Russia
+
+## Transform the data to get the countries 
+sp <- sp %>%
+  mutate(ID = paste("id", 1:nrow(sp), sep = "")) %>%
+  separate(Location, into = c("str1", "str2", "str3", "str4"), sep = ", ")
+usa <- sp %>% 
+  filter(str4 == "USA")
+rus <- sp %>%
+  filter(str3 %in% c("Russia", "Kazakhstan") | str2 == "Russia")
+sp <- sp %>%
+  mutate(Country = ifelse(ID %in% usa$ID, "USA",
+                          ifelse(ID %in% rus$ID, "Russia", "Other")))
+usrus <- sp %>%
+  filter(Country %in% c("USA", "Russia"))
+usrus$Country <- factor(usrus$Country, levels = c("USA", "Russia"))
+
+# Summary plot and table
+ct <- count(usrus, Country, Success)
+ggplot(data = ct) +
+  geom_mosaic(aes(weight = n, x = product(Country), fill = Success)) +
+  xlab("Country") + ylab("Success") + 
+  ggtitle("Space Mission Outcome for USA and Russia")
+tally(Success ~ Country, format = "proportion", data = usrus) %>% round(4)
+
+# Model
+usrus_mod <- glm(Success ~ Country, family = binomial, data = usrus)
+coef(summary(usrus_mod)) %>% round(5)
+c(exp(coef(usrus_mod)[2]), exp(confint(usrus_mod)[2,]) 
+
+# Space Race
+
+## Transform the data to get the decades
+sprace <- sp %>%
+  filter(as.numeric(Year) %in% 1960:1979) %>%
+  mutate(Decade = ifelse(Year %in% 1960:1969, "1960s", "1970s"))
+
+## Plot and tables
+ct <- count(sprace, Decade, Success)
+ggplot(data = ct) +
+  geom_mosaic(aes(weight = n, x = product(Decade), fill = Success)) +
+  xlab("Decade") + ylab("Success") + 
+  ggtitle("1960s and 1970s Space Race Outcomes")
+tally(Success ~ Decade, format = "proportion", data = sprace) %>% round(4)
+
+## Model
+dec_mod <- glm(Success ~ Decade, family = binomial, data = sprace)
+coef(summary(dec_mod))
+c(exp(coef(dec_mod)[2]), exp(confint(dec_mod)[2,])
+  
+## Goodness-of-fit: R^2
+Rsq_log_reg <- function(model) {
+  1 - model$deviance / model$null.deviance
+}
+
+Rsquared <- rbind.data.frame(c(Rsq_log_reg(mod), 
+                               Rsq_log_reg(usrus_mod), 
+                               Rsq_log_reg(dec_mod)))
+colnames(Rsquared) <-  c("Rocket Status", "Country", "Decade")
+Rsquared %>% round(5)
 ```
-
-## Other Results
-
--   Active rockets have greater chance of success than retired rockets 
-
-(OR = 1.696, 95% CI (1.273, 2.302))
-
--   Russia is more likely to have successful space missions than USA 
-
-(OR = 1.376, 95% CI (1.099, 1.722))
-
-## Future Work
-
--   Quantitative Predictors
--   Other Modeling Methods: Mixed Models, Time Series
-
-## Thanks!
-
--   GitHub: https://github.com/qntkhvn/spacemissions
--   Good luck with Finals!
-
-<br>
-
--   What were the odds in 1957 of being the exact stray dog chosen to be the first living thing in space? ~Laika million to one~
