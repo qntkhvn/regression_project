@@ -98,7 +98,7 @@ ggplot(data = ct) +
 tally(Success ~ Active, format = "proportion", data = sp) %>% round(4)
 ```
 
-As we can see, the proportion of mission success for active rockets is higher than the chance of success for retired shuttles. We then fit a logistic regression model of mission outcome versus rocket status and make inferences about the terms in our model to verify this relationship.
+The proportion of mission success for active rockets is higher than the chance of success for retired shuttles. We then fit a logistic regression model of mission outcome versus rocket status and made inferences about the terms in the model to verify this relationship.
 
 ```{r}
 mod <- glm(Success ~ Active, family = binomial, data = sp)
@@ -109,11 +109,12 @@ summary(mod)$coef
 c(exp(coef(mod)[2]), exp(confint(mod)[2,])) %>% round(5)
 ```
 
-With z = 3.501 and p-value = 0.0005, we have evidence that active rockets and retired rockets differ in the chance of space mission success. If we focus on the estimated value for slope term of our model (0.528), it is the log odds ratio of success for the indicated category, active rockets, compared to the reference category, retired rockets. After exponentiating, the odds ratio for the probability of launch success comparing active to retired shuttles is 1.696 (95% CI (1.273, 2.302)), implying that active rockets have 1.696 times greater odds, thus are more likely to succeed, than non-active rockets.
+With z = 3.501 and p-value = 0.0005, there is evidence that active rockets and retired rockets differ in the chance of space mission success. The estimated value for slope in our model (0.528) is the log odds ratio of success for the indicated category, active rockets, compared to the reference category, retired rockets. After exponentiating, the odds ratio for the probability of launch success comparing active to retired shuttles is 1.696 (95% CI (1.273, 2.302)), implying that active rockets have 1.696 times greater odds of success than non-active rockets.
 
 ## Mission Success for USA and Russia
 
-Next, we are going to find out whether there is a difference between the chance of success for space launches conducted by the two giants in the space industry, the United States and Russia. This rivalry began in the late 1950s and early 1960s, as Russia started the competition by launching the first artificial satellite - Sputnik 1 - in 1957 and sending the first man into space - Yuri Gagarin - in 1961. As a result, the United States and President Kennedy responded by making an ambitious expansion and transformation to their national space program, with the goal of a moon landing, which they achieved in 1969. From then on, the race continues, and it is arguably the one of, if not the best rivalry in the history of space exploration. To find out which country is more successful, we begin with some numerical and visual summary of the launches executed by the two nations.
+Next, we investigated whether there is a difference between the chance of success for space launches conducted by the two giants in the space industry, the United States and Russia. This rivalry began in the late 1950s and early 1960s, as Russia started the competition by launching the first artificial satellite - Sputnik 1 - in 1957 and sending the first man into space - Yuri Gagarin - in 1961. As a result, the United States and President Kennedy responded by making an ambitious expansion and transformation of the national space program with the primary goal of a landing a man on the moon, which they achieved in 1969. From then on, the race continues, and it is arguably the one of, if not the best rivalry in the history of space exploration. To find out which country is more successful, we begin with some numerical and visual summary of the launches executed by the two nations.
+
 
 ```{r}
 sp <- sp %>%
@@ -143,14 +144,14 @@ usrus$Country <- factor(usrus$Country, levels = c("USA", "Russia"))
 ct <- count(usrus, Country, Success)
 ggplot(data = ct) +
   geom_mosaic(aes(weight = n, x = product(Country), fill = Success)) +
-  xlab("Country") + ylab("Success") + ggtitle("Space Mission Outcome for USA and Russia")
+  xlab("Country") + ylab("Success") + ggtitle("Space Launch Outcome for USA and Russia")
 ```
 
 ```{r}
 tally(Success ~ Country, format = "proportion", data = usrus) %>% round(4)
 ```
 
-The probability of mission success between the two countries are very close to one another, but Russia has a small lead over the United States. Indeed, the two nations differ in the likelihood of launch success, as illustrated by our test result (z = 2.789, p-value = 0.005). What we also learn from the test output after back-transforming the estimated slope coefficient is that Russia has 1.376 times greater odds (95% CI (1.099, 1.722)), hence a higher chance, of having positive space mission outcome than America.
+The two countries' probability of mission success are very close to one another, but Russia has a small lead over the United States. Indeed, the two nations differ in the likelihood of launch success, as illustrated by our test result (z = 2.789, p-value = 0.005). What we also learn from the test output after back-transforming the estimated slope coefficient is that Russia has 1.376 times greater odds (95% CI (1.099, 1.722)), hence a higher chance, of having a positive launch outcome than America.
 
 ```{r}
 usrus_mod <- glm(Success ~ Country,
@@ -168,7 +169,7 @@ c(exp(coef(usrus_mod)[2]), exp(confint(usrus_mod)[2,])) %>% round(5)
 
 ## Space Race Decades: 1960s and 1970s
 
-Our last relationship for this investigation is about launch outcome for the two space race decades, 1960s and 1970s, which is arguably the most important era in the history of space exploration. As mentioned in the previous section, the main highlights of this time period are Yuri Gagarin becoming the first cosmonaut to fly into outer space, and the peak of the space race, which is the Apollo 11 mission that landed the first humans on the Moon. In addition to those historical events, this era means a lot to the future of astronomy and space science, as it paved the path for more space innovation and exploration in the following years. Similar to the previous two analyses, to explore how successful the space missions were in the 1960s and 1970s, we take a quick look at some figures of summary for our variables.
+Our last relationship for this investigation concerns launch outcomes for the two space race decades, the 1960s and 1970s. This is arguably the most important era in the history of space exploration. As mentioned in the previous section, the main highlights of this time period are Yuri Gagarin becoming the first cosmonaut to fly into outer space, and the peak of the space race, which is the Apollo 11 mission that landed the first humans on the Moon. In addition to those historical events, this era meant a lot to the future of astronomy and space science, as it paved the path for more space innovation and exploration in the following years. Similar to the previous two analyses, we explored how successful the space missions were in the 1960s and 1970s by examining some summary figures for our variables.
 
 ```{r}
 sprace <- sp %>% 
@@ -185,7 +186,7 @@ ggplot(data = ct) +
 tally(Success ~ Decade, format = "proportion", data = sprace) %>% round(5)
 ```
 
-From the plot and statistics above, it is clear that the 1970s has a higher success rate (92.7%) than the 1960s (79.1%). The test results from the outputted table of coefficients confirm that the chance of success for space missions is different for the two space race decades. In particular, there is an increase in space launch success rate from the 1960s to 1970s, as demonstrated by an odds ratio of 3.355 (95% CI (2.512, 4.519)). 
+From the plot and statistics above, it is clear that the 1970s has a higher success rate (92.7%) than the 1960s (79.1%). The test results from the table of coefficients confirm that the chance of success for space missions is different for the two space race decades. In particular, there is an increase in space launch success rate from the 1960s to 1970s, as demonstrated by an odds ratio of 3.355 (95% CI (2.512, 4.519)). 
 
 ```{r, }
 dec_mod <- glm(Success ~ Decade, family = binomial, data = sprace)
@@ -199,9 +200,9 @@ c(exp(coef(dec_mod)[2]), exp(confint(dec_mod)[2,])) %>% round(5)
 
 # Model Fit
 
-After fitting and analyzing our models, we are interested in how well our models fit their respective set of data. To measure the goodness-of-fit for our models, we use the $R^2$ statistic for logistic regression. $R^2$ can be computed as $$R^2 = 1 - \frac{Residual \ Deviance}{Null \ Deviance},$$ where the residual deviance is the deviance of our fitted (full) model, showing how well the response is predicted by the model when the predictor(s) are included. On the other hand, the null deviance represents how effectively the logit is predicted by a reduced model with only the intercept.
+After fitting and analyzing our models, we are interested in how well our models fit their respective set of data. To measure the goodness-of-fit for our models, we use the $R^2$ statistic for logistic regression. $R^2$ can be computed as $$R^2 = 1 - \frac{Residual \ Deviance}{Null \ Deviance},$$ where the residual deviance is the deviance of our fitted (full) model, showing how well the response is predicted by the model when the predictor is included. On the other hand, the null deviance represents how effectively the logit is predicted by a reduced model with only the intercept.
 
-There are similarities and differences between this $R^2$ for logistic regression and the linear regression version of $R^2$. In relation to the coefficient of determination, the residual deviance is equivalent to the error sum of squares, measuring the differences between the observed and predicted values for the response variable; whereas the null deviance is similar to the total sum of squares, which describes the differences between the observed dependent variable and its mean. Unlike linear regression's $R^2$, the $R^2$ for our logit model does not indicate the percentage of the variability in the dependent variable that the independent variable(s) explain collectively, but instead it is a ratio of how perfect or worst the fit is between the model and the data. The statistic is also not related to any correlation coefficient, hence is not a measure of the relationship strength between the variables.
+There are similarities and differences between this $R^2$ for logistic regression and the linear regression version of $R^2$. In relation to the coefficient of determination, the residual deviance is equivalent to the error sum of squares, measuring the differences between the observed and predicted values for the response variable; whereas the null deviance is similar to the total sum of squares, which describes the differences between the observed dependent variable and its mean. Unlike linear regression's $R^2$, the $R^2$ for our logit model does not indicate the percentage of the variability in the dependent variable that the independent variable explains collectively, but instead it is a ratio of how perfect or bad the fit is between the model and the data. The statistic is also not related to any correlation coefficient, hence is not a measure of the relationship strength between the variables.
 
 ```{r}
 Rsq_log_reg <- function(model) {
@@ -215,13 +216,13 @@ colnames(Rsquared) <-  c("Rocket Status", "Country", "Decade")
 Rsquared %>% round(5)
 ```
 
-We calculated the $R^2$ for our three logistic models, which are displayed in the table above. As we can see, the fits do not look that great here, as all of our $R^2$ are closer to 0 rather than to a perfect fit of 1. The logistic regression model comparing space launch success for the two space race decades did the least worst of fitting its corresponding set of data compared to the other two models. This could be something to improve in the future, as we could try to find the best methods or subset of variables for predicting space mission success that give us the best fit.
+We calculated the $R^2$ for our three logistic models, which are displayed in the table above. As we can see, the fits are not great here, as all $R^2$ values are closer to 0 rather than to a perfect fit of 1. The logistic regression model comparing space launch success for the two space race decades did the least worst of fitting its corresponding set of data compared to the other two models. This could be something to improve in the future, as we could try to find the best methods or subset of variables for predicting space mission success that give us the best fit.
 
-# Conclusion and Discussion
+# Discussion and Conclusion 
 
-In summary, we discovered multiple statistically meaningful relationships between rocket launch success and other factors. Unsurprisingly, rockets that are currently active have 1.696 times greater odds of success than rockets that are no longer active. This makes sense, as rockets are retired when technology improves or when, for example, they explode. Additionally, we found that space shuttles launched in the 1970s had 3.355 times greater odds of success than those launched in the 1960s. These results comport with common sense, although they would not be useful models for predicting the success of future launches, as all future rockets used will be active by definition and launches will not take place during either decade.
+In summary, we discovered multiple statistically meaningful relationships between rocket launch success and other factors. Unsurprisingly, rockets that are currently active have 1.696 times greater odds of success than rockets that are no longer active. This makes sense, as rockets are retired when technology improves or when, for example, they explode. Additionally, we found that space shuttles launched in the 1970s had 3.355 times greater odds of success than those launched in the 1960s. These results comport with common sense, although they would not be useful models for predicting the success of future launches, as all future rockets used will be active by definition and launches will not take place during either space race decade.
 
-Another interesting finding, and one with potential value for predicting future success, is that Russia has 1.376 times greater odds of success than the USA. This may be due to any number of factors that are country-specific. Possible explanations include funding, scientific or technological advances, or level of agency oversight. Although we do not currently have data with which we can discover those explanations, this finding does open the door to the interesting question of why Russia has higher odds of space mission success than the United States. This is a possible avenue for future research into this topic. 
+Another interesting finding, and one with potential value for predicting future launch success, is that Russia has 1.376 times greater odds of success than the USA. This may be due to any number of factors that are country-specific. Possible explanations include funding, scientific or technological advances, or level of agency oversight. Although we do not currently have data with which we can explore those explanations, this finding does open the door to the interesting question of why Russia has higher odds of space mission success than the United States. This is a possible avenue for future research into this topic. 
 
 Overall, it is important to keep in mind that these models provide small, incomplete pictures of the factors influencing the result of space launches. Each model analyzes only one variable and the goodness-of-fit measures reveal that they do not fit the data well. In order to build a more complete picture, many more details about each launch would be necessary. Other future statistical analyses with these data may include multivariate regression, principal component analysis, neural networks, or time series analysis. 
 
