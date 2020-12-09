@@ -33,7 +33,7 @@ library(ggmosaic)
 \large \bf{Abstract} 
 \end{center}
 
-This project is a statistical investigation into space missions from 1957 to 2020. We primarily focused on modeling the relationship between mission outcome and other categorical factors. This work gives us sufficient evidence that there is a difference in the likelihood of space mission success between active and retired rockets; the United States and Russia; and the space race decades - 1960s and 1970s. In particular, our main findings are: 1) active rockets have greater chance of success than retired rockets (OR = 1.696, 95% CI (1.273, 2.302)); 2) Russia is more likely to have successful space missions than the United States (OR = 1.376, 95% CI (1.099, 1.722)); and 3) there's an increase in success rate from 1960s to 1970s (OR = 3.355, 95% CI (2.512, 4.519)).
+This project is a statistical investigation into space missions from 1957 to 2020. We primarily focused on modeling the relationship between space launch outcome and other categorical factors. This work gives us sufficient evidence that there is a difference in the likelihood of space mission success between active and retired rockets; the United States and Russia; and the space race decades - 1960s and 1970s. In particular, our main findings are: 1) active rockets have a higher chance of mission success than retired rockets (OR = 1.696, 95% CI (1.273, 2.302)); 2) Russia is more likely to succeed in conducting space launches than the United States (OR = 1.376, 95% CI (1.099, 1.722)); and 3) there is an increase in space launch success rate from 1960s to 1970s (OR = 3.355, 95% CI (2.512, 4.519)).
 
 *Keywords*: Space exploration, logistic regression
 
@@ -109,7 +109,7 @@ summary(mod)$coef
 c(exp(coef(mod)[2]), exp(confint(mod)[2,])) %>% round(5)
 ```
 
-With z = 3.501 and p-value = 0.0005, there is evidence that active rockets and retired rockets differ in the chance of space mission success. The estimated value for slope in our model (0.528) is the log odds ratio of success for the indicated category, active rockets, compared to the reference category, retired rockets. After exponentiating, the odds ratio for the probability of launch success comparing active to retired shuttles is 1.696 (95% CI (1.273, 2.302)), implying that active rockets have 1.696 times greater odds of success than non-active rockets.
+With z = 3.501 and p-value = 0.0005, there is evidence that active rockets and retired rockets differ in the chance of space mission success. The estimated value for slope in our model (0.528) is the log odds ratio of success for the indicated category, active rockets, compared to the reference category, retired rockets. After exponentiating, the odds ratio for the probability of launch success comparing active to retired shuttles is 1.696 (95% CI (1.273, 2.302)), implying that active rockets have 1.696 times greater odds, thus are more likely to succeed, than non-active rockets.
 
 ## Mission Success for USA and Russia
 
@@ -148,7 +148,7 @@ ggplot(data = ct) +
 tally(Success ~ Country, format = "proportion", data = usrus) %>% round(4)
 ```
 
-The two countries' probability of mission success are very close to one another, but Russia has a small lead over the United States. Indeed, the two nations differ in the likelihood of launch success, as illustrated by our test result (z = 2.789, p-value = 0.005). What we also learn from the test output after back-transforming the estimated slope coefficient is that Russia has 1.376 times greater odds (95% CI (1.099, 1.722)), hence a higher chance, of having a positive launch outcome than America.
+The two countries' probability of mission success are very close to one another, but Russia has a small lead over the United States. Indeed, the two nations differ in the likelihood of launch success, as illustrated by our test result (z = 2.789, p-value = 0.005). What we also learn from the test output after back-transforming the estimated slope coefficient is that Russia has 1.376 times greater odds (95% CI (1.099, 1.722)), hence a higher chance, of accomplishing positive space launch outcome than America.
 
 ```{r}
 usrus_mod <- glm(Success ~ Country,
@@ -160,8 +160,6 @@ coef(summary(usrus_mod)) %>% round(5)
 ```{r, echo=FALSE}
 c(exp(coef(usrus_mod)[2]), exp(confint(usrus_mod)[2,])) %>% round(5)
 ```
-
-
 
 ## Space Race Decades: 1960s and 1970s
 
@@ -214,9 +212,9 @@ We calculated the $R^2$ for our three logistic models, which are displayed in th
 
 # Conclusion 
 
-In summary, we discovered multiple statistically meaningful relationships between rocket launch success and other factors. Unsurprisingly, rockets that are currently active have 1.696 times greater odds of success than rockets that are no longer active. This makes sense, as rockets are retired when technology improves or when, for example, they explode. Additionally, we found that space shuttles launched in the 1970s had 3.355 times greater odds of success than those launched in the 1960s. These results comport with common sense, although they would not be useful models for predicting the success of future launches, as all future rockets used will be active by definition and launches will not take place during either space race decade.
+In summary, we discovered multiple statistically meaningful relationships between rocket launch success and other factors. Unsurprisingly, rockets that are currently active have 1.696 times greater odds of success than those that are no longer active. This makes sense, as rockets are retired when technology improves or when, for example, they explode. Additionally, we found that space shuttles launched in the 1970s had 3.355 times greater odds of success than those launched in the 1960s. These results comport with common sense, although they would not be useful models for predicting the outcome for space missions in the future, as all future means of transportation used will be active by definition and launches will not take place during either space race decade.
 
-Another interesting finding, and one with potential value for predicting future launch success, is that Russia has 1.376 times greater odds of success than the USA. This may be due to any number of factors that are country-specific. Possible explanations include funding, scientific or technological advances, or level of agency oversight. Although we do not currently have data with which we can explore those explanations, this finding does open the door to the interesting question of why Russia has higher odds of space mission success than America. This is a possible avenue for future research into this topic. 
+Another interesting finding, and one with potential value for predicting future launch success, is that Russia has 1.376 times greater odds of success than the USA. This may be due to any number of factors that are country-specific. Possible explanations include funding, scientific or technological advances, or level of agency oversight. Although we do not currently have data with which we can explore those explanations, this finding does open the door to the interesting question of why Russia has a higher mission success chance than America. This is a possible avenue for future research into this topic. 
 
 Overall, it is important to keep in mind that these models provide small, incomplete pictures of the factors influencing the result of space launches. Each model analyzes only one variable and the goodness-of-fit measures reveal that they do not fit the data well. In order to build a more complete picture, many more details about each launch would be necessary. Other future statistical analyses with these data may include multivariate regression, principal component analysis, neural networks, or time series analysis. 
 
@@ -230,13 +228,13 @@ Overall, it is important to keep in mind that these models provide small, incomp
 
 # Credit
 
-Quang performed exploratory data analysis and researched and wrote descriptions of the logistic regression model. He also wrote the code to perform logistic regression in R and calculate the goodness-of-fit measure. Quang wrote the abstract, methodology, analysis, and model fit sections of the paper. Sean found the dataset, performed exploratory data analysis, wrote some of the code for data visualizations and researched goodness of fit measurement options. He wrote the introduction, data, and discussion and conclusions sections of the paper. Together we decided the model selection, wrote code for data visualization, and created the project presentation in R Markdown.
+Quang performed exploratory data analysis and researched and wrote descriptions of the logistic regression model. He also wrote the code to perform logistic regression in R and calculate the goodness-of-fit measure. Quang wrote the abstract, methodology, analysis, and model fit sections of the paper. Sean found the dataset, performed exploratory data analysis, wrote some of the code for data visualizations and researched goodness of fit measurement options. He wrote the introduction, data, and conclusion sections of the paper. Together we decided the model selection, wrote code for data visualization, and created the project presentation and report in R Markdown.
 
 \newpage
 
 # Appendix
 
-The R code for this manuscript can be found below. In addition, all of the materials related to this project are publicly available on GitHub at https://github.com/qntkhvn/spacemissions.
+The R code for this document can be found below. In addition, all of the materials related to this project are publicly available on GitHub at https://github.com/qntkhvn/spacemissions.
 
 ```{r, eval=FALSE, echo=TRUE}
 # Packages
