@@ -148,7 +148,7 @@ ggplot(data = ct) +
 tally(Success ~ Country, format = "proportion", data = usrus) %>% round(4)
 ```
 
-The two countries' probability of mission success are very close to one another, but Russia has a small lead over the United States. Indeed, the two nations differ in the likelihood of launch success, as illustrated by our test result (z = 2.789, p-value = 0.005). What we also learn from the test output after back-transforming the estimated slope coefficient is that Russia has 1.376 times greater odds (95% CI (1.099, 1.722)), hence a higher chance, of accomplishing positive space launch outcome than America.
+The two countries' probabilities of mission success are very close to one another, but Russia has a small lead over the United States. Indeed, the two nations differ in the likelihood of launch success, as illustrated by our test result (z = 2.789, p-value = 0.005). What we also learn from the test output after back-transforming the estimated slope coefficient is that Russia has 1.376 times greater odds (95% CI (1.099, 1.722)), hence a higher chance, of accomplishing positive space launch outcome than America.
 
 ```{r}
 usrus_mod <- glm(Success ~ Country,
