@@ -3,9 +3,9 @@ title: "Analysis of Space Mission Success"
 author: "Quang Nguyen and Sean Finn"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
-  pdf_document:
+  pdf_document: 
     number_sections: yes
-    highlight: monochrome
+    highlight: tango
     df_print: kable
 geometry: margin=0.8in
 fontsize: 11pt
@@ -33,7 +33,7 @@ library(ggmosaic)
 \large \bf{Abstract} 
 \end{center}
 
-This project is a statistical investigation into space missions from 1957 to 2020. We primarily focused on modeling the relationship between mission outcome and other categorical factors. This work gives us sufficient evidence that there is a difference in the likelihood of space mission success between active and retired rockets; the United States and Russia; and the space race decades - 1960s and 1970s. In particular, our main findings are: 1) active rockets have greater chance of success than retired rockets (OR = 1.696, 95% CI (1.273, 2.302)), 2) Russia is more likely to have successful space missions than USA (OR = 1.376, 95% CI (1.099, 1.722)), and 3) there's an increase in success rate from 1960s to 1970s (OR = 3.355, 95% CI (2.512, 4.519)).
+This project is a statistical investigation into space missions from 1957 to 2020. We primarily focused on modeling the relationship between mission outcome and other categorical factors. This work gives us sufficient evidence that there is a difference in the likelihood of space mission success between active and retired rockets; the United States and Russia; and the space race decades - 1960s and 1970s. In particular, our main findings are: 1) active rockets have greater chance of success than retired rockets (OR = 1.696, 95% CI (1.273, 2.302)); 2) Russia is more likely to have successful space missions than the United States (OR = 1.376, 95% CI (1.099, 1.722)); and 3) there's an increase in success rate from 1960s to 1970s (OR = 3.355, 95% CI (2.512, 4.519)).
 
 *Keywords*: Space exploration, logistic regression
 
@@ -115,15 +115,12 @@ With z = 3.501 and p-value = 0.0005, there is evidence that active rockets and r
 
 Next, we investigated whether there is a difference between the chance of success for space launches conducted by the two giants in the space industry, the United States and Russia. This rivalry began in the late 1950s and early 1960s, as Russia started the competition by launching the first artificial satellite - Sputnik 1 - in 1957 and sending the first man into space - Yuri Gagarin - in 1961. As a result, the United States and President Kennedy responded by making an ambitious expansion and transformation of the national space program with the primary goal of a landing a man on the moon, which they achieved in 1969. From then on, the race continues, and it is arguably the one of, if not the best rivalry in the history of space exploration. To find out which country is more successful, we begin with some numerical and visual summary of the launches executed by the two nations.
 
-
 ```{r}
 sp <- sp %>%
   mutate(ID = paste("id", 1:nrow(sp), sep = "")) %>% 
   separate(Location, into = c("str1", "str2", "str3", "str4"), sep = ", ")
-
 usa <- sp %>% 
   filter(str4 == "USA")
-
 rus <- sp %>% 
   filter(str3 %in% c("Russia", "Kazakhstan") | str2 == "Russia")
 ```
@@ -157,7 +154,6 @@ The two countries' probability of mission success are very close to one another,
 usrus_mod <- glm(Success ~ Country,
                  family = binomial,
                  data = usrus)
-
 coef(summary(usrus_mod)) %>% round(5)
 ```
 
@@ -175,7 +171,6 @@ Our last relationship for this investigation concerns launch outcomes for the tw
 sprace <- sp %>% 
   filter(as.numeric(Year) %in% 1960:1979) %>% 
   mutate(Decade = ifelse(Year %in% 1960:1969, "1960s", "1970s"))
-
 ct <- count(sprace, Decade, Success)
 ggplot(data = ct) +
   geom_mosaic(aes(weight = n, x = product(Decade), fill = Success)) +
@@ -208,7 +203,6 @@ There are similarities and differences between this $R^2$ for logistic regressio
 Rsq_log_reg <- function(model) {
   1 - model$deviance / model$null.deviance
 }
-
 Rsquared <- rbind.data.frame(c(Rsq_log_reg(mod), 
                                Rsq_log_reg(usrus_mod), 
                                Rsq_log_reg(dec_mod)))
@@ -218,11 +212,11 @@ Rsquared %>% round(5)
 
 We calculated the $R^2$ for our three logistic models, which are displayed in the table above. As we can see, the fits are not great here, as all $R^2$ values are closer to 0 rather than to a perfect fit of 1. The logistic regression model comparing space launch success for the two space race decades did the least worst of fitting its corresponding set of data compared to the other two models. This could be something to improve in the future, as we could try to find the best methods or subset of variables for predicting space mission success that give us the best fit.
 
-# Discussion and Conclusion 
+# Conclusion 
 
 In summary, we discovered multiple statistically meaningful relationships between rocket launch success and other factors. Unsurprisingly, rockets that are currently active have 1.696 times greater odds of success than rockets that are no longer active. This makes sense, as rockets are retired when technology improves or when, for example, they explode. Additionally, we found that space shuttles launched in the 1970s had 3.355 times greater odds of success than those launched in the 1960s. These results comport with common sense, although they would not be useful models for predicting the success of future launches, as all future rockets used will be active by definition and launches will not take place during either space race decade.
 
-Another interesting finding, and one with potential value for predicting future launch success, is that Russia has 1.376 times greater odds of success than the USA. This may be due to any number of factors that are country-specific. Possible explanations include funding, scientific or technological advances, or level of agency oversight. Although we do not currently have data with which we can explore those explanations, this finding does open the door to the interesting question of why Russia has higher odds of space mission success than the United States. This is a possible avenue for future research into this topic. 
+Another interesting finding, and one with potential value for predicting future launch success, is that Russia has 1.376 times greater odds of success than the USA. This may be due to any number of factors that are country-specific. Possible explanations include funding, scientific or technological advances, or level of agency oversight. Although we do not currently have data with which we can explore those explanations, this finding does open the door to the interesting question of why Russia has higher odds of space mission success than America. This is a possible avenue for future research into this topic. 
 
 Overall, it is important to keep in mind that these models provide small, incomplete pictures of the factors influencing the result of space launches. Each model analyzes only one variable and the goodness-of-fit measures reveal that they do not fit the data well. In order to build a more complete picture, many more details about each launch would be necessary. Other future statistical analyses with these data may include multivariate regression, principal component analysis, neural networks, or time series analysis. 
 
@@ -242,7 +236,7 @@ Quang performed exploratory data analysis and researched and wrote descriptions 
 
 # Appendix
 
-The R code for this manuscript can be found below. In addition, all of the materials related to this project are publicly available on GitHub at https://github.com/qntkhvn/spacemissions
+The R code for this manuscript can be found below. In addition, all of the materials related to this project are publicly available on GitHub at https://github.com/qntkhvn/spacemissions.
 
 ```{r, eval=FALSE, echo=TRUE}
 # Packages
@@ -259,25 +253,21 @@ sp <- space[,3:ncol(space)] %>%
          Success = as.factor(ifelse(Status.Mission == "Success", "Yes", "No"))) %>%
   rename(Company = Company.Name)
 
-# Rocket Status
-
+# Model 1: Rocket Status
 ## Mosaic plot
 ct <- count(sp, Active, Success)
 ggplot(data = ct) +
   geom_mosaic(aes(weight = n, x = product(Active), fill = Success)) +
   xlab("Active") + ylab("Success") + 
   ggtitle("Space Mission Status and Outcome")
-
 ## 2x2 table
 tally(Success ~ Active, format = "proportion", data = sp) %>% round(4)
-
 ## Model
 mod <- glm(Success ~ Active, family = binomial, data = sp)
 summary(mod)$coef %>% round(5)
 c(exp(coef(mod)[2]), exp(confint(mod)[2,])
-
-# USA vs Russia
-
+  
+# Model 2: USA vs Russia
 ## Transform the data to get the countries 
 sp <- sp %>%
   mutate(ID = paste("id", 1:nrow(sp), sep = "")) %>%
@@ -292,7 +282,6 @@ sp <- sp %>%
 usrus <- sp %>%
   filter(Country %in% c("USA", "Russia"))
 usrus$Country <- factor(usrus$Country, levels = c("USA", "Russia"))
-
 # Summary plot and table
 ct <- count(usrus, Country, Success)
 ggplot(data = ct) +
@@ -300,19 +289,16 @@ ggplot(data = ct) +
   xlab("Country") + ylab("Success") + 
   ggtitle("Space Mission Outcome for USA and Russia")
 tally(Success ~ Country, format = "proportion", data = usrus) %>% round(4)
-
 # Model
 usrus_mod <- glm(Success ~ Country, family = binomial, data = usrus)
 coef(summary(usrus_mod)) %>% round(5)
 c(exp(coef(usrus_mod)[2]), exp(confint(usrus_mod)[2,]) 
-
-# Space Race
-
+  
+# Model 3: Space Race Decades
 ## Transform the data to get the decades
 sprace <- sp %>%
   filter(as.numeric(Year) %in% 1960:1979) %>%
   mutate(Decade = ifelse(Year %in% 1960:1969, "1960s", "1970s"))
-
 ## Plot and tables
 ct <- count(sprace, Decade, Success)
 ggplot(data = ct) +
@@ -320,7 +306,6 @@ ggplot(data = ct) +
   xlab("Decade") + ylab("Success") + 
   ggtitle("1960s and 1970s Space Race Outcomes")
 tally(Success ~ Decade, format = "proportion", data = sprace) %>% round(4)
-
 ## Model
 dec_mod <- glm(Success ~ Decade, family = binomial, data = sprace)
 coef(summary(dec_mod))
@@ -330,7 +315,6 @@ c(exp(coef(dec_mod)[2]), exp(confint(dec_mod)[2,])
 Rsq_log_reg <- function(model) {
   1 - model$deviance / model$null.deviance
 }
-
 Rsquared <- rbind.data.frame(c(Rsq_log_reg(mod), 
                                Rsq_log_reg(usrus_mod), 
                                Rsq_log_reg(dec_mod)))
