@@ -319,3 +319,7 @@ Rsquared <- rbind.data.frame(c(Rsq_log_reg(mod),
 colnames(Rsquared) <-  c("Rocket Status", "Country", "Decade")
 Rsquared %>% round(5)
 ```
+
+```{r ref.label=knitr::all_labels()[-1], echo=FALSE, eval=FALSE}
+
+```
